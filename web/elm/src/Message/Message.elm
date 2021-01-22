@@ -71,6 +71,7 @@ type DomID
     | TopBarPauseToggle Concourse.PipelineIdentifier
     | VisibilityButton PipelinesSection Concourse.DatabaseID
     | PipelineCardFavoritedIcon PipelinesSection Concourse.DatabaseID
+    | InstanceGroupCardFavoritedIcon PipelinesSection Concourse.InstanceGroupIdentifier
     | FooterCliIcon Cli.Cli
     | WelcomeCardCliIcon Cli.Cli
     | CopyTokenButton
