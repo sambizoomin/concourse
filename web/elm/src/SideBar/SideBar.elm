@@ -15,6 +15,7 @@ import Assets
 import Colors
 import Concourse
 import EffectTransformer exposing (ET)
+import Favorites
 import HoverState
 import Html exposing (Html)
 import Html.Attributes exposing (id)
@@ -39,16 +40,17 @@ import Views.Styles
 
 type alias Model m =
     Tooltip.Model
-        { m
-            | expandedTeamsInAllPipelines : Set String
-            , collapsedTeamsInFavorites : Set String
-            , pipelines : WebData (List Concourse.Pipeline)
-            , sideBarState : SideBarState
-            , draggingSideBar : Bool
-            , screenSize : ScreenSize.ScreenSize
-            , favoritedPipelines : Set Concourse.DatabaseID
-            , route : Routes.Route
-        }
+        (Favorites.Model
+            { m
+                | expandedTeamsInAllPipelines : Set String
+                , collapsedTeamsInFavorites : Set String
+                , pipelines : WebData (List Concourse.Pipeline)
+                , sideBarState : SideBarState
+                , draggingSideBar : Bool
+                , screenSize : ScreenSize.ScreenSize
+                , route : Routes.Route
+            }
+        )
 
 
 type alias PipelineScoped a =
@@ -60,6 +62,11 @@ type alias PipelineScoped a =
 
 update : Message -> Model m -> ( Model m, List Effects.Effect )
 update message model =
+    updateSidebar message model |> Favorites.update message
+
+
+updateSidebar : Message -> Model m -> ( Model m, List Effects.Effect )
+updateSidebar message model =
     let
         toggle element set =
             if Set.member element set then
@@ -67,15 +74,6 @@ update message model =
 
             else
                 Set.insert element set
-
-        toggleFavorite pipelineID =
-            let
-                favoritedPipelines =
-                    toggle pipelineID model.favoritedPipelines
-            in
-            ( { model | favoritedPipelines = favoritedPipelines }
-            , [ Effects.SaveFavoritedPipelines <| favoritedPipelines ]
-            )
     in
     case message of
         Click HamburgerMenu ->
@@ -110,15 +108,6 @@ update message model =
 
         Click SideBarResizeHandle ->
             ( { model | draggingSideBar = True }, [] )
-
-        Click (SideBarFavoritedIcon pipelineID) ->
-            toggleFavorite pipelineID
-
-        Click (PipelineCardFavoritedIcon _ pipelineID) ->
-            toggleFavorite pipelineID
-
-        Click (TopBarFavoritedIcon pipelineID) ->
-            toggleFavorite pipelineID
 
         Hover (Just domID) ->
             ( model, [ Effects.GetViewportOf domID ] )
@@ -166,7 +155,12 @@ handleCallback callback ( model, effects ) =
 
 
 handleDelivery : Delivery -> ET (Model m)
-handleDelivery delivery ( model, effects ) =
+handleDelivery delivery =
+    handleDeliverySidebar delivery >> Favorites.handleDelivery delivery
+
+
+handleDeliverySidebar : Delivery -> ET (Model m)
+handleDeliverySidebar delivery ( model, effects ) =
     case delivery of
         SideBarStateReceived (Ok state) ->
             ( { model | sideBarState = state }, effects )
@@ -195,9 +189,6 @@ handleDelivery delivery ( model, effects ) =
               else
                 []
             )
-
-        FavoritedPipelinesReceived (Ok pipelines) ->
-            ( { model | favoritedPipelines = pipelines }, effects )
 
         _ ->
             ( model, effects )
