@@ -1302,27 +1302,14 @@ cardsView session params teamCards =
                     favoritedCards =
                         teamCards
                             |> List.concatMap Tuple.second
-                            |> List.filterMap
+                            |> List.filter
                                 (\c ->
-                                    let
-                                        isFavorited =
-                                            Favorites.isPipelineFavorited session
-                                    in
                                     case c of
                                         PipelineCard p ->
-                                            if isFavorited p then
-                                                Just <| PipelineCard p
+                                            Favorites.isPipelineFavorited session p
 
-                                            else
-                                                Nothing
-
-                                        InstanceGroupCard p ps ->
-                                            case List.filter isFavorited (p :: ps) of
-                                                x :: xs ->
-                                                    Just <| InstanceGroupCard x xs
-
-                                                [] ->
-                                                    Nothing
+                                        InstanceGroupCard p _ ->
+                                            Favorites.isInstanceGroupFavorited session (Concourse.toInstanceGroupId p)
                                 )
 
                     allPipelinesHeader =
