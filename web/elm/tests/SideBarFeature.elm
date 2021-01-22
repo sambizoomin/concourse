@@ -54,9 +54,6 @@ pageLoadIsSideBarCompatible iAmLookingAtThePage =
     , test "fetches screen size on page load" <|
         when iAmLookingAtThePage
             >> then_ myBrowserFetchesScreenSize
-    , test "listens for sidebar state on page load" <|
-        when iAmLookingAtThePage
-            >> then_ myBrowserListensForSideBarStates
     , test "fetches sidebar state on page load" <|
         when iAmLookingAtThePage
             >> then_ myBrowserFetchesSideBarState
@@ -758,7 +755,6 @@ hasCurrentPipelineInSideBar iAmLookingAtThePage =
             >> when iAmLookingAtThePipelineWithTheSameName
             >> then_ iSeeAnInvisibleBackground
     ]
-
 
 
 all : Test
@@ -2099,12 +2095,6 @@ iSeeItStretches =
 
 iSeeThreeChildrenDivs =
     Query.children [ tag "div" ] >> Query.count (Expect.equal 3)
-
-
-myBrowserListensForSideBarStates =
-    Tuple.first
-        >> Application.subscriptions
-        >> Common.contains Subscription.OnSideBarStateReceived
 
 
 myBrowserReadSideBarState =
