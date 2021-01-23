@@ -1290,7 +1290,7 @@ cardsView session params teamCards =
             params.jobs
                 |> FetchResult.withDefault Dict.empty
 
-        inInstanceGroupView =
+        viewingInstanceGroups =
             Filter.isViewingInstanceGroups params.query
 
         ( headerView, offsetHeight ) =
@@ -1302,14 +1302,26 @@ cardsView session params teamCards =
                     favoritedCards =
                         teamCards
                             |> List.concatMap Tuple.second
-                            |> List.filter
+                            |> List.concatMap
                                 (\c ->
                                     case c of
                                         PipelineCard p ->
-                                            Favorites.isPipelineFavorited session p
+                                            if Favorites.isPipelineFavorited session p then
+                                                [ c ]
 
-                                        InstanceGroupCard p _ ->
-                                            Favorites.isInstanceGroupFavorited session (Concourse.toInstanceGroupId p)
+                                            else
+                                                []
+
+                                        InstanceGroupCard p ps ->
+                                            (if Favorites.isInstanceGroupFavorited session (Concourse.toInstanceGroupId p) then
+                                                [ c ]
+
+                                             else
+                                                []
+                                            )
+                                                ++ (List.filter (Favorites.isPipelineFavorited session) (p :: ps)
+                                                        |> List.map PipelineCard
+                                                   )
                                 )
 
                     allPipelinesHeader =
@@ -1332,7 +1344,7 @@ cardsView session params teamCards =
                                 , viewportWidth = params.viewportWidth
                                 , viewportHeight = params.viewportHeight
                                 , scrollTop = params.scrollTop - offset
-                                , isInstanceGroupView = inInstanceGroupView
+                                , viewingInstanceGroups = viewingInstanceGroups
                                 }
                                 favoritedCards
                     in
@@ -1349,7 +1361,7 @@ cardsView session params teamCards =
                         , jobs = jobs
                         , dashboardView = params.dashboardView
                         , query = params.query
-                        , inInstanceGroupView = inInstanceGroupView
+                        , viewingInstanceGroups = viewingInstanceGroups
                         }
                         layout.headers
                         layout.cards
@@ -1395,6 +1407,7 @@ cardsView session params teamCards =
                                             , viewportWidth = params.viewportWidth
                                             , viewportHeight = params.viewportHeight
                                             , scrollTop = params.scrollTop - startingOffset
+                                            , viewingInstanceGroups = viewingInstanceGroups
                                             }
                                             teamName
                                             cards
@@ -1412,7 +1425,7 @@ cardsView session params teamCards =
                                     , jobs = jobs
                                     , dashboardView = params.dashboardView
                                     , query = params.query
-                                    , inInstanceGroupView = inInstanceGroupView
+                                    , viewingInstanceGroups = viewingInstanceGroups
                                     }
                                     teamName
                                     layout.cards
