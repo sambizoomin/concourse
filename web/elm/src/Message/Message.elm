@@ -98,7 +98,8 @@ type DomID
     | SideBarTeam PipelinesSection String
     | SideBarPipeline PipelinesSection Concourse.PipelineIdentifier
     | SideBarInstanceGroup PipelinesSection Concourse.TeamName String
-    | SideBarFavoritedIcon Concourse.DatabaseID
+    | SideBarPipelineFavoritedIcon Concourse.DatabaseID
+    | SideBarInstanceGroupFavoritedIcon Concourse.InstanceGroupIdentifier
     | Dashboard
     | DashboardGroup String
 

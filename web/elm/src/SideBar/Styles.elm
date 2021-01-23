@@ -5,6 +5,7 @@ module SideBar.Styles exposing
     , SidebarElementColor(..)
     , collapseIcon
     , column
+    , favoriteIcon
     , hamburgerIcon
     , hamburgerMenu
     , iconGroup
@@ -12,7 +13,6 @@ module SideBar.Styles exposing
     , instanceGroupBadge
     , opacityAttr
     , pipeline
-    , pipelineFavorite
     , pipelineIcon
     , pipelineName
     , sectionHeader
@@ -360,8 +360,8 @@ instanceGroupBadge { count, color } =
         [ Html.text text ]
 
 
-pipelineFavorite : { filled : Bool, isBright : Bool } -> List (Html.Attribute msg)
-pipelineFavorite fav =
+favoriteIcon : { filled : Bool, isBright : Bool } -> List (Html.Attribute msg)
+favoriteIcon fav =
     [ style "background-image" <|
         Assets.backgroundImage <|
             Just <|
