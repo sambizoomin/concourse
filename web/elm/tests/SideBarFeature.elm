@@ -97,7 +97,7 @@ hasSideBar iAmLookingAtThePage =
                 >> given iAmOnANonPhoneScreen
                 >> given myBrowserFetchedPipelines
                 >> when iAmLookingAtTheHamburgerMenu
-                >> then_ (itIsClickable Message.HamburgerMenu)
+                >> then_ (itIsClickable Message.SideBarIcon)
         , describe "before pipelines are fetched"
             [ defineHoverBehaviour
                 { name = "hamburger icon"
@@ -110,7 +110,7 @@ hasSideBar iAmLookingAtThePage =
                     { description = "grey"
                     , selector = [ containing [ style "opacity" "0.5" ] ]
                     }
-                , hoverable = Message.HamburgerMenu
+                , hoverable = Message.SideBarIcon
                 , hoveredSelector =
                     { description = "still grey"
                     , selector = [ containing [ style "opacity" "0.5" ] ]
@@ -146,7 +146,7 @@ hasSideBar iAmLookingAtThePage =
                 { description = "grey"
                 , selector = [ containing [ style "opacity" "0.5" ] ]
                 }
-            , hoverable = Message.HamburgerMenu
+            , hoverable = Message.SideBarIcon
             , hoveredSelector =
                 { description = "white"
                 , selector = [ containing [ style "opacity" "1" ] ]
@@ -182,7 +182,7 @@ hasSideBar iAmLookingAtThePage =
                 >> given iAmOnANonPhoneScreen
                 >> given iShrankTheViewport
                 >> when iAmLookingAtTheLeftHandSectionOfTheTopBar
-                >> then_ iDoNotSeeAHamburgerIcon
+                >> then_ iSeeNoHamburgerIcon
         , test "side bar does not expand before teams and pipelines are fetched" <|
             given iAmLookingAtThePage
                 >> given iAmOnANonPhoneScreen
@@ -760,7 +760,6 @@ hasCurrentPipelineInSideBar iAmLookingAtThePage =
     ]
 
 
-
 all : Test
 all =
     describe "sidebar"
@@ -874,12 +873,20 @@ iAmLookingAtTheFirstChild =
 
 
 iSeeAHamburgerIcon =
-    Query.has
-        (DashboardTests.iconSelector
-            { size = hamburgerIconWidth
-            , image = Assets.HamburgerMenuIcon
-            }
-        )
+    Query.contains
+        sideBarIcon
+
+
+sideBarIcon =
+    [ DashboardTests.iconSelector
+        { size = hamburgerIconWidth
+        , image = Assets.SideBarIconClosed
+        }
+    , DashboardTests.iconSelector
+        { size = hamburgerIconWidth
+        , image = Assets.SideBarIconOpened
+        }
+    ]
 
 
 hamburgerIconWidth =
@@ -982,11 +989,7 @@ dataRefreshes =
 
 iSeeNoHamburgerIcon =
     Query.hasNot
-        (DashboardTests.iconSelector
-            { size = hamburgerIconWidth
-            , image = Assets.HamburgerMenuIcon
-            }
-        )
+        sideBarIcon
 
 
 iAmLookingAtTheHamburgerMenu =
@@ -1032,7 +1035,7 @@ iReleaseTheSideBarHandle =
 iClickedTheHamburgerIcon =
     Tuple.first
         >> Application.update
-            (TopLevelMessage.Update <| Message.Click Message.HamburgerMenu)
+            (TopLevelMessage.Update <| Message.Click Message.SideBarIcon)
 
 
 iSeeALighterBackground =
@@ -1638,15 +1641,6 @@ itIsHoverable domID =
         ]
 
 
-iDoNotSeeAHamburgerIcon =
-    Query.hasNot
-        (DashboardTests.iconSelector
-            { size = hamburgerIconWidth
-            , image = Assets.HamburgerMenuIcon
-            }
-        )
-
-
 iSeeNoSideBar =
     Query.hasNot [ id "side-bar" ]
 
@@ -2028,15 +2022,6 @@ iAmLookingAtTheLeftSideOfTheTopBar =
         >> Query.find [ id "top-bar-app" ]
         >> Query.children []
         >> Query.first
-
-
-iSeeAHamburgerMenu =
-    Query.has
-        (DashboardTests.iconSelector
-            { size = "54px"
-            , image = Assets.HamburgerMenuIcon
-            }
-        )
 
 
 myBrowserFetchesScreenSize =
